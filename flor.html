@@ -27,7 +27,7 @@ button { cursor:pointer; }
 .brand-mark { color:var(--yellow); font-size:30px; line-height:1; text-shadow:0 0 23px #ffbc5055; }
 .top-note { font-size:12px; color:var(--muted); letter-spacing:.15em; }
 .heading { position:absolute; z-index:2; top:11%; left:50%; width:min(680px,90%); text-align:center; transform:translateX(-50%); pointer-events:none; }
-.eyebrow { margin:0 0 14px; color:var(--yellow); font-size:12px; letter-spacing:.3em; font-weight:normal; }
+.eyebrow { margin:0 0 14px; color:var(--yellow); font-size:clamp(20px, 3vw, 26px); letter-spacing:.15em; font-weight:bold; }
 h1 { margin:0; font-family:Georgia,"Times New Roman",serif; font-size:clamp(38px,4.7vw,72px); font-weight:400; letter-spacing:-.045em; line-height:1.06; text-shadow:0 2px 24px #15071f; }
 h1 em { font-weight:400; color:#ffdb7d; }
 .heading p { margin:15px 0 0; font-size:14px; color:#cab8d7; letter-spacing:.035em; line-height:1.5; }
@@ -84,7 +84,7 @@ h1 em { font-weight:400; color:#ffdb7d; }
 @media(max-width:540px) {
  #experience { min-height:0; }
  .topbar { padding:18px 20px; } .brand { gap:8px; font-size:12px; letter-spacing:.14em; } .brand-mark { font-size:25px; }
- .heading { top:11.5%; } .eyebrow { margin-bottom:12px; font-size:12px; letter-spacing:.19em; }
+ .heading { top:11.5%; } .eyebrow { margin-bottom:12px; font-size:18px; letter-spacing:.1em; font-weight:bold; }
  h1 { font-size:clamp(36px,10vw,48px); }
  .heading p { max-width:260px; margin:13px auto 0; font-size:14px; }
  .side-caption,.scene-number { display:none; }
@@ -4428,7 +4428,9 @@ addEventListener('pagehide',event=>{if(!event.persisted){cancelAnimationFrame(fr
 
 <div id="gallery-modal">
   <div class="gallery-container">
+    
     <button class="gallery-close" id="gallery-close">&times;</button>
+    <h3 style="color: #f6c568; font-family: Georgia, serif; font-size: 22px; margin-top: 5px; margin-bottom: 15px; font-style: italic;">Haz de nosotros vasijas útiles.</h3>
     <div id="gallery-images">
       <img src="assets/images2/WhatsApp Image 2026-09-20 at 21.24.28 (1).jpeg" class="gallery-image active">
       <img src="assets/images2/WhatsApp Image 2026-09-20 at 21.24.28 (2).jpeg" class="gallery-image">
