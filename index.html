@@ -4364,7 +4364,7 @@ function animate(time){
       let cameraZ = 14.5;
       if(inBouquet === 9) {
          cameraZ = landscape ? 6 : 8;
-         $('subtitle').textContent='El ramo está completo.';
+         $('subtitle').textContent='';
       }
       camera.position.z = mix(camera.position.z, cameraZ, 1-Math.exp(-dt*2));
       camera.lookAt(0,0,0);
