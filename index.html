@@ -4221,23 +4221,21 @@ function resize(){
 function changePhase(next){
   phase=next;phaseTime=0;root.dataset.phase=next;
   document.querySelectorAll('[data-step]').forEach(el=>{const active=el.dataset.step===next;el.classList.toggle('active',active);if(active)el.setAttribute('aria-current','step');else el.removeAttribute('aria-current');});
-  const index={travel:'01 / 03',gather:'02 / 03',bouquet:'03 / 03'}; $('scene-index').textContent=index[next];
-  if(next==='travel'){
-    $('eyebrow').textContent='HASTA QUE CRISTO VENGA';$('headline').innerHTML='Nuestro amor no tiene<br><em>fecha de vencimiento.</em>';$('subtitle').textContent='Hay flores que cruzarían el universo por ti.';$('main-action').innerHTML='Ver mi ramo <span aria-hidden="true">↗</span>';stems.visible=false;wrap.visible=false;$('interaction').classList.remove('visible');$('interaction').inert=true;closeMessage();
-  }
-  if(next==='gather'){
-    $('eyebrow').textContent='TODOS LOS CAMINOS ME LLEVAN A TI';$('subtitle').textContent='Y de pronto, todo encuentra su lugar.';
-    flowers.forEach(f=>{f.userData.start=f.position.clone();f.userData.startQuat=f.quaternion.clone();f.userData.startScale=f.scale.x;});
-  }
-  if(next==='bouquet'){
-    $('eyebrow').textContent='HASTA QUE CRISTO VENGA';$('headline').innerHTML='Nuestro amor no tiene<br><em>fecha de vencimiento.</em>';$('subtitle').textContent='Acércate a una flor. Hay algo para ti.';$('main-action').innerHTML='<span aria-hidden="true">↻</span> Volver a viajar';$('interaction').classList.add('visible');$('interaction').inert=false;$('live').textContent='Tu ramo está listo. Toca una flor o usa los nueve botones para leer sus mensajes.';
+  if(next==='interactive'){
+    $('eyebrow').textContent='HASTA QUE CRISTO VENGA';
+    $('headline').innerHTML='Nuestro amor no tiene<br><em>fecha de vencimiento.</em>';
+    $('subtitle').textContent='Atrapa las flores flotantes haciendo clic.';
+    if($('main-action')) $('main-action').style.display='none';
+    $('interaction').classList.add('visible');$('interaction').inert=false;
+    $('live').textContent='Atrapa las flores flotantes haciendo clic en ellas.';
   }
 }
 function beginTravel(){
-  elapsed=0;paused=false;updatePauseButton();changePhase('travel');
-  flowers.forEach((f,i)=>{const a=i/9*Math.PI*2;f.position.set(Math.cos(a)*(4+i%3*2),Math.sin(a)*3,-8-i*5);f.rotation.set(rand()*.3,rand()*.5,rand()*5);f.scale.setScalar(.6);f.visible=true;});
-  travelFlowers.forEach((f,i)=>{resetFlying(f,i);f.visible=true;});hearts.forEach((h,i)=>{resetFlying(h,i+3);h.scale.setScalar(.25+rand()*.4);h.visible=true;});
-  if(reduced){changePhase('gather');phaseTime=CONFIG.agrupacion;updateGather(1);changePhase('bouquet');}
+  elapsed=0;paused=false;updatePauseButton();changePhase('interactive');
+  flowers.forEach((f,i)=>{resetFlying(f,i);f.userData.status=0;f.userData.speed=5+rand()*3;f.visible=true;});
+  travelFlowers.forEach(f=>{f.visible=false;});
+  hearts.forEach((h,i)=>{resetFlying(h,i+3);h.scale.setScalar(.25+rand()*.4);h.visible=true;});
+  stems.visible=wrap.visible=true;stems.scale.setScalar(1);wrap.scale.setScalar(1);
 }
 function updateGather(t){
   flowers.forEach((f,i)=>{
@@ -4260,7 +4258,16 @@ function closeMessage(){
   const hadFocus=$('message').contains(document.activeElement),old=selected;
   selected=-1;pinned=false;$('message').classList.remove('open');$('message').inert=true;
   [...$('flower-nav').children].forEach(b=>b.setAttribute('aria-pressed','false'));
-  if(hadFocus&&old>=0&&phase==='bouquet')$('flower-nav').children[old].focus();
+  if(old>=0 && phase==='interactive'){
+    const f = flowers[old];
+    if(f.userData.status === 0){
+      f.userData.status = 1;
+      f.userData.start = f.position.clone();
+      f.userData.startQuat = f.quaternion.clone();
+      f.userData.gatherTime = 0;
+    }
+  }
+  if(hadFocus&&old>=0&&phase==='interactive')$('flower-nav').children[old].focus();
 }
 function pick(event){
   const rect=renderer.domElement.getBoundingClientRect();mouse.set((event.clientX-rect.left)/rect.width*2-1,-(event.clientY-rect.top)/rect.height*2+1);raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects(pickers,false);return hits.length?hits[0].object.userData.index:-1;
@@ -4272,21 +4279,20 @@ function bindEvents(){
   addEventListener('resize',resize);
   const canvas=renderer.domElement;
   canvas.addEventListener('pointermove',event=>{
-    if(event.pointerType==='touch'||phase!=='bouquet')return;
+    if(event.pointerType==='touch'||phase!=='interactive')return;
     const id=pick(event);canvas.style.cursor=id>=0?'pointer':'default';
-    if(id>=0)showMessage(id,false);
   });
-  canvas.addEventListener('click',event=>{if(phase==='bouquet'){const id=pick(event);if(id>=0)showMessage(id,true);else closeMessage();}});
+  canvas.addEventListener('click',event=>{
+    if(phase==='interactive'){
+      const id=pick(event);if(id>=0)showMessage(id,true);else closeMessage();
+    }
+  });
   canvas.addEventListener('pointerleave',()=>{canvas.style.cursor='default';});
   $('close-message').addEventListener('click',closeMessage);
   $('next-message').addEventListener('click',()=>showMessage((selected+1)%9,true));
   addEventListener('keydown',e=>{if(e.key==='Escape')closeMessage();});
   $('pause').addEventListener('click',()=>{paused=!paused;updatePauseButton();});
-  $('main-action').addEventListener('click',()=>{
-    if(phase==='bouquet')beginTravel();else if(phase==='travel'){paused=false;updatePauseButton();changePhase('gather');}else{phaseTime=CONFIG.agrupacion;updateGather(1);changePhase('bouquet');}
-  });
   document.addEventListener('visibilitychange',()=>{lastTime=0;});
-  motionQuery.addEventListener('change',e=>{reduced=e.matches;if(reduced&&phase!=='bouquet'){if(phase==='travel')changePhase('gather');updateGather(1);changePhase('bouquet');}});
   canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();paused=true;$('loading').classList.remove('done');$('loading-text').textContent='La escena se ha pausado. Recuperando la conexión gráfica…';});
   canvas.addEventListener('webglcontextrestored',()=>{location.reload();});
 }
@@ -4303,22 +4309,46 @@ function animate(time){
   const dt=lastTime?Math.min((time-lastTime)/1000,.05):0;lastTime=time;
   if(!paused){
     const delta=reduced?0:dt;elapsed+=delta;phaseTime+=delta;
-    if(phase==='travel'&&phaseTime>=CONFIG.viaje)changePhase('gather');
-    if(phase==='gather'&&phaseTime>=CONFIG.agrupacion){updateGather(1);changePhase('bouquet');}
-    const flight=phase==='travel'?1:phase==='gather'?1-smooth(phaseTime/CONFIG.agrupacion):0;
-    updateStars(delta,reduced?0:mix(.23,23,flight));lineMaterial.opacity=.38*flight;grid.position.z=-48+(elapsed*3%1.6)*flight;grid.material.opacity=mix(.25,.13,flight);
-    if(phase==='travel'){
-      flowers.forEach((f,i)=>{f.position.z+=delta*(8+i*.4);f.rotation.z+=delta*.12;if(f.position.z>5){f.position.z=-42;}});
-    }else if(phase==='gather')updateGather(phaseTime/CONFIG.agrupacion);
-    travelFlowers.forEach((f,i)=>{if(flight>0){f.position.z+=delta*f.userData.speed;f.rotation.z+=delta*f.userData.spin;if(f.position.z>10)resetFlying(f,i);f.scale.setScalar((.48+i%3*.18)*(phase==='gather'?Math.max(0,1-phaseTime/2):1));}else f.visible=false;});
-    hearts.forEach((h,i)=>{if(flight>0){h.position.z+=delta*h.userData.speed;h.rotation.y+=delta*.4;if(h.position.z>10){resetFlying(h,i);h.scale.setScalar(.35);}if(phase==='gather')h.scale.multiplyScalar(Math.max(0,1-delta*1.25));}else h.visible=false;});
-    if(phase==='bouquet'){
-      // El ramo permanece fijo; solo se destaca ligeramente la flor seleccionada.
-      flowers.forEach((f,i)=>{const scale=f.userData.targetScale*(i===selected?1.085:1);const a=reduced?1:1-Math.exp(-dt*8);f.scale.lerp(v3(scale,scale,scale),a);f.position.z=mix(f.position.z,targets[i].z+(i===selected?.16:0),a);});
+    
+    updateStars(delta,reduced?0:3);
+    lineMaterial.opacity=.38;grid.position.z=-48+(elapsed*3%1.6);grid.material.opacity=.25;
+    dust.material.opacity=0.65;if(!reduced)dust.rotation.z=elapsed*.012;
+    
+    if(phase==='interactive'){
+      let inBouquet = 0;
+      flowers.forEach((f,i)=>{
+        if(f.userData.status === 0) {
+           f.position.z += delta * f.userData.speed; f.rotation.z += delta * f.userData.spin; 
+           if(f.position.z > 8) resetFlying(f, i);
+        } else if(f.userData.status === 1) {
+           f.userData.gatherTime += delta;
+           const t = Math.min(1, f.userData.gatherTime / 1.5);
+           const p=clamp(t/.85),e=ease(p),arc=Math.sin(Math.PI*p);
+           f.position.lerpVectors(f.userData.start,targets[i],e);
+           f.position.x+=Math.sin(i*1.8)*arc*1.2;f.position.y+=Math.cos(i*1.6)*arc*.7;
+           f.quaternion.slerpQuaternions(f.userData.startQuat,f.userData.targetQuat,e);
+           f.scale.setScalar(mix(0.45,f.userData.targetScale,e)+arc*.13);
+           if(t >= 1) f.userData.status = 2;
+        } else if(f.userData.status === 2) {
+           inBouquet++;
+           const scale=f.userData.targetScale*(i===selected?1.085:1);
+           const a=1-Math.exp(-dt*8);f.scale.lerp(v3(scale,scale,scale),a);
+           f.position.z=mix(f.position.z,targets[i].z+(i===selected?.16:0),a);
+           f.quaternion.slerpQuaternions(f.quaternion, f.userData.targetQuat, a);
+        }
+      });
+      
+      hearts.forEach((h,i)=>{if(h.visible){h.position.z+=delta*h.userData.speed;h.rotation.y+=delta*.4;if(h.position.z>10)resetFlying(h,i);}});
+      
+      let cameraZ = 14.5;
+      if(inBouquet === 9) {
+         cameraZ = landscape ? 6 : 8;
+         $('subtitle').textContent='El ramo está completo.';
+      }
+      camera.position.z = mix(camera.position.z, cameraZ, 1-Math.exp(-dt*2));
+      camera.lookAt(0,0,0);
     }
-    dust.material.opacity=mix(.65,0,flight);if(!reduced)dust.rotation.z=elapsed*.012;
-    const cameraZ=phase==='travel'?14.5:phase==='gather'?mix(14.5,11.8,smooth(phaseTime/CONFIG.agrupacion)):11.8;
-    camera.position.set(0,0,cameraZ);camera.lookAt(0,0,0);
+    
     $('duration').textContent=`00:${String(Math.floor(Math.min(elapsed,99))).padStart(2,'0')}`;
   }
   renderer.render(scene,camera);
