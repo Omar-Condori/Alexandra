@@ -4226,7 +4226,7 @@ function changePhase(next){
   if(next==='interactive'){
     $('eyebrow').textContent='HASTA QUE CRISTO VENGA';
     $('headline').innerHTML='Nuestro amor no tiene<br><em>fecha de vencimiento.</em>';
-    $('subtitle').textContent='Atrapa las flores flotantes haciendo clic.';
+    $('subtitle').textContent='Listo para armar un ramo de flores. Haz clic en una.';
     if($('main-action')) $('main-action').style.display='none';
     $('interaction').classList.add('visible');$('interaction').inert=false;
     $('live').textContent='Atrapa las flores flotantes haciendo clic en ellas.';
@@ -4255,18 +4255,13 @@ function updateGather(t){
   const show=smooth((t-.46)/.54);stems.visible=wrap.visible=t>.46;stems.scale.setScalar(Math.max(.001,show));wrap.scale.setScalar(Math.max(.001,show));
 }
 function showMessage(index,pin=false){
-  if(phase!=='bouquet')return;
+  if(phase!=='bouquet' && phase!=='interactive')return;
   if(selected===index){pinned=pinned||pin;return;}
   selected=index;pinned=pin;
   $('message-label').textContent='';$('message-text').textContent=MENSAJES[index];$('message').classList.add('open');$('message').inert=false;$('live').textContent=`Flor ${index+1}. ${MENSAJES[index]}`;
   [...$('flower-nav').children].forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));
-}
-function closeMessage(){
-  const hadFocus=$('message').contains(document.activeElement),old=selected;
-  selected=-1;pinned=false;$('message').classList.remove('open');$('message').inert=true;
-  [...$('flower-nav').children].forEach(b=>b.setAttribute('aria-pressed','false'));
-  if(old>=0 && phase==='interactive'){
-    const f = flowers[old];
+  if(phase==='interactive'){
+    const f = flowers[index];
     if(f.userData.status === 0){
       f.userData.status = 1;
       f.userData.start = f.position.clone();
@@ -4275,6 +4270,12 @@ function closeMessage(){
       f.userData.gatherTime = 0;
     }
   }
+}
+function closeMessage(){
+  const hadFocus=$('message').contains(document.activeElement),old=selected;
+  selected=-1;pinned=false;$('message').classList.remove('open');$('message').inert=true;
+  [...$('flower-nav').children].forEach(b=>b.setAttribute('aria-pressed','false'));
+
   if(hadFocus&&old>=0&&phase==='interactive')$('flower-nav').children[old].focus();
 }
 function pick(event){
