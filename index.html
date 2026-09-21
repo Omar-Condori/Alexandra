@@ -163,7 +163,7 @@ h1 em { font-weight:400; color:#ffdb7d; }
   <span id="scene-index" style="display:none;"></span>
   <section id="interaction" class="interaction" aria-label="Elegir una flor" inert><p>Cada flor guarda algo que quiero decirte.</p><div class="flower-nav" id="flower-nav"></div></section>
   <aside id="message" class="message" aria-label="Mensaje de amor" inert>
-    <div class="message-top"><span id="message-label">FLOR 01 · PARA TI</span><button id="close-message" class="close" aria-label="Cerrar mensaje">×</button></div>
+    <div class="message-top"><span id="message-label"></span><button id="close-message" class="close" aria-label="Cerrar mensaje">×</button></div>
     <blockquote id="message-text"></blockquote>
     <div class="message-bottom"><span>Con todo mi amor <span aria-hidden="true">♡</span></span><button id="next-message" class="next-message">Otra flor →</button></div>
   </aside>
@@ -4253,7 +4253,7 @@ function showMessage(index,pin=false){
   if(phase!=='bouquet')return;
   if(selected===index){pinned=pinned||pin;return;}
   selected=index;pinned=pin;
-  $('message-label').textContent=`FLOR ${String(index+1).padStart(2,'0')} · PARA TI`;$('message-text').textContent=MENSAJES[index];$('message').classList.add('open');$('message').inert=false;$('live').textContent=`Flor ${index+1}. ${MENSAJES[index]}`;
+  $('message-label').textContent='';$('message-text').textContent=MENSAJES[index];$('message').classList.add('open');$('message').inert=false;$('live').textContent=`Flor ${index+1}. ${MENSAJES[index]}`;
   [...$('flower-nav').children].forEach((b,i)=>b.setAttribute('aria-pressed',String(i===index)));
 }
 function closeMessage(){
