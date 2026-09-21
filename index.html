@@ -4236,7 +4236,7 @@ function beginTravel(){
   elapsed=0;paused=false;updatePauseButton();changePhase('interactive');
   flowers.forEach((f,i)=>{
     f.userData.status=0;
-    f.userData.speed=0.3+rand()*0.4;
+    f.userData.speed=0.1+rand()*0.2;
     f.visible=true;
   });
   travelFlowers.forEach(f=>{f.visible=false;});
@@ -4332,7 +4332,7 @@ function animate(time){
            f.position.x = Math.sin(elapsed * f.userData.speed + i) * 6;
            f.position.y = Math.cos(elapsed * (f.userData.speed*0.8) + i) * 3 + 1;
            f.position.z = -5 + Math.sin(elapsed * 0.5 + i) * 2;
-           f.rotation.z = Math.sin(elapsed * 0.5 + i) * 0.2;
+           f.rotation.z = Math.sin(elapsed * 0.2 + i) * 0.15;
            if(f.userData.stem) f.userData.stem.visible = false;
         } else if(f.userData.status === 1) {
            collecting++;
