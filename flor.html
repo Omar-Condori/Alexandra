@@ -139,14 +139,27 @@ h1 em { font-weight:400; color:#ffdb7d; }
   padding: 8px 20px; border-radius: 20px; cursor: pointer; transition: 0.3s;
 }
 .gallery-btn:hover { background: #543c1c55; }
+
+.escudo-bg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 150%;
+  max-width: 450px;
+  z-index: -1;
+  opacity: 0.35;
+  pointer-events: none;
+}
 </style>
 </head>
 <body>
 <main id="experience" data-phase="loading">
   <canvas id="cosmos" aria-label="Galaxia y ramo de nueve flores amarillas en tres dimensiones. Selecciona una flor con el cursor o usa los botones numerados."></canvas>
   <div class="vignette" aria-hidden="true"></div><div class="grain" aria-hidden="true"></div>
-  <header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true">✦</span> ALEXANDRA</div></header>
-  <div class="heading"><div class="eyebrow" id="eyebrow">HASTA QUE CRISTO VENGA</div><h1 id="headline">Nuestro amor no tiene<br><em>fecha de vencimiento.</em></h1><p id="subtitle">Hay flores que cruzarían el universo por ti.</p></div>
+  <header class="topbar"><div class="brand"><span class="brand-mark" aria-hidden="true">✦</span> ALEXANDRA ---> toca la pantalla para reproducir la musica.</div></header>
+  <div class="heading">
+  <img src="assets/image/escudo.png" class="escudo-bg" aria-hidden="true"><div class="eyebrow" id="eyebrow">HASTA QUE CRISTO VENGA</div><h1 id="headline">Nuestro amor no tiene<br><em>fecha de vencimiento.</em></h1><p id="subtitle">Hay flores que cruzarían el universo por ti.</p></div>
   <span id="scene-index" style="display:none;"></span>
   <section id="interaction" class="interaction" aria-label="Elegir una flor" inert><p>Cada flor guarda algo que quiero decirte.</p><div class="flower-nav" id="flower-nav"></div></section>
   <aside id="message" class="message" aria-label="Mensaje de amor" inert>
