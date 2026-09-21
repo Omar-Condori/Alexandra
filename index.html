@@ -4167,9 +4167,11 @@ function buildEnvironment(){
 function createStem(position,index){
   const bottom=v3((index-4)*.045,-2.58,.01), mid=v3(position.x*.35,-.8,-.17);
   const curve=new THREE.CatmullRomCurve3([bottom,mid,v3(position.x,position.y,position.z-.12)]);
-  const g=new THREE.TubeGeometry(curve,18,.027,6,false);mesh(g,stemMaterial,stems);resources.add(g);
+  const stemGroup = new THREE.Group(); stemGroup.visible = false; bouquet.add(stemGroup);
+  flowers[index].userData.stem = stemGroup;
+  const g=new THREE.TubeGeometry(curve,18,.027,6,false);mesh(g,stemMaterial,stemGroup);resources.add(g);
   for(let side=0;side<2;side++){
-    const t=.32+side*.23,point=curve.getPoint(t);const leaf=mesh(leafGeometry,leafMaterial,stems);leaf.position.copy(point);leaf.rotation.set(.22,(index%3-1)*.5,((index+side)%2?1:-1)*(.9+index*.04));leaf.scale.setScalar(.7+(index%3)*.1);
+    const t=.32+side*.23,point=curve.getPoint(t);const leaf=mesh(leafGeometry,leafMaterial,stemGroup);leaf.position.copy(point);leaf.rotation.set(.22,(index%3-1)*.5,((index+side)%2?1:-1)*(.9+index*.04));leaf.scale.setScalar(.7+(index%3)*.1);
   }
 }
 function buildWrapping(){
@@ -4232,10 +4234,15 @@ function changePhase(next){
 }
 function beginTravel(){
   elapsed=0;paused=false;updatePauseButton();changePhase('interactive');
-  flowers.forEach((f,i)=>{resetFlying(f,i);f.userData.status=0;f.userData.speed=5+rand()*3;f.visible=true;});
+  flowers.forEach((f,i)=>{
+    f.userData.status=0;
+    f.userData.speed=0.3+rand()*0.4;
+    f.visible=true;
+  });
   travelFlowers.forEach(f=>{f.visible=false;});
   hearts.forEach((h,i)=>{resetFlying(h,i+3);h.scale.setScalar(.25+rand()*.4);h.visible=true;});
-  stems.visible=wrap.visible=true;stems.scale.setScalar(1);wrap.scale.setScalar(1);
+  if(typeof stems !== 'undefined') stems.visible=false;
+  if(typeof wrap !== 'undefined') { wrap.visible=false; wrap.scale.setScalar(1); }
 }
 function updateGather(t){
   flowers.forEach((f,i)=>{
@@ -4264,6 +4271,7 @@ function closeMessage(){
       f.userData.status = 1;
       f.userData.start = f.position.clone();
       f.userData.startQuat = f.quaternion.clone();
+      f.userData.startScale = f.scale.x;
       f.userData.gatherTime = 0;
     }
   }
@@ -4316,27 +4324,39 @@ function animate(time){
     
     if(phase==='interactive'){
       let inBouquet = 0;
+      let collecting = 0;
       flowers.forEach((f,i)=>{
         if(f.userData.status === 0) {
-           f.position.z += delta * f.userData.speed; f.rotation.z += delta * f.userData.spin; 
-           if(f.position.z > 8) resetFlying(f, i);
+           // Float horizontally and vertically, instead of flying at camera
+           f.position.x = Math.sin(elapsed * f.userData.speed + i) * 6;
+           f.position.y = Math.cos(elapsed * (f.userData.speed*0.8) + i) * 3 + 1;
+           f.position.z = -5 + Math.sin(elapsed * 0.5 + i) * 2;
+           f.rotation.z = Math.sin(elapsed * 0.5 + i) * 0.2;
+           if(f.userData.stem) f.userData.stem.visible = false;
         } else if(f.userData.status === 1) {
+           collecting++;
+           if(f.userData.stem) f.userData.stem.visible = true;
            f.userData.gatherTime += delta;
            const t = Math.min(1, f.userData.gatherTime / 1.5);
            const p=clamp(t/.85),e=ease(p),arc=Math.sin(Math.PI*p);
            f.position.lerpVectors(f.userData.start,targets[i],e);
            f.position.x+=Math.sin(i*1.8)*arc*1.2;f.position.y+=Math.cos(i*1.6)*arc*.7;
            f.quaternion.slerpQuaternions(f.userData.startQuat,f.userData.targetQuat,e);
-           f.scale.setScalar(mix(0.45,f.userData.targetScale,e)+arc*.13);
+           f.scale.setScalar(mix(f.userData.startScale || 0.6, f.userData.targetScale, e)+arc*.13);
            if(t >= 1) f.userData.status = 2;
         } else if(f.userData.status === 2) {
            inBouquet++;
+           if(f.userData.stem) f.userData.stem.visible = true;
            const scale=f.userData.targetScale*(i===selected?1.085:1);
            const a=1-Math.exp(-dt*8);f.scale.lerp(v3(scale,scale,scale),a);
            f.position.z=mix(f.position.z,targets[i].z+(i===selected?.16:0),a);
            f.quaternion.slerpQuaternions(f.quaternion, f.userData.targetQuat, a);
         }
       });
+      
+      if(typeof wrap !== 'undefined') {
+        wrap.visible = (inBouquet > 0 || collecting > 0);
+      }
       
       hearts.forEach((h,i)=>{if(h.visible){h.position.z+=delta*h.userData.speed;h.rotation.y+=delta*.4;if(h.position.z>10)resetFlying(h,i);}});
       
