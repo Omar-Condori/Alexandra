@@ -23,7 +23,7 @@ button { cursor:pointer; }
 .vignette { position:absolute; inset:0; z-index:1; pointer-events:none; background:radial-gradient(ellipse at center,transparent 32%,rgba(5,2,13,.3) 80%,rgba(5,2,13,.7)); }
 .grain { position:absolute; inset:0; z-index:1; opacity:.035; pointer-events:none; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Cpath fill='white' filter='url(%23n)' d='M0 0h180v180H0z'/%3E%3C/svg%3E"); }
 .topbar { position:absolute; z-index:3; top:0; left:0; right:0; padding:30px 42px; display:flex; align-items:center; justify-content:space-between; gap:20px; }
-.brand { display:flex; align-items:center; gap:12px; font-size:14px; font-weight:600; letter-spacing:.18em; }
+.brand { display:flex; align-items:center; gap:12px; font-size:14px; font-weight:700; letter-spacing:.12em; text-shadow: 0 2px 8px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.9); color: #fff; }
 .brand-mark { color:var(--yellow); font-size:30px; line-height:1; text-shadow:0 0 23px #ffbc5055; }
 .top-note { font-size:12px; color:var(--muted); letter-spacing:.15em; }
 .heading { position:absolute; z-index:2; top:11%; left:50%; width:min(680px,90%); text-align:center; transform:translateX(-50%); pointer-events:none; }
@@ -142,13 +142,13 @@ h1 em { font-weight:400; color:#ffdb7d; }
 
 .escudo-bg {
   position: absolute;
-  top: 50%;
+  top: 55%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 150%;
-  max-width: 450px;
+  width: 80%;
+  max-width: 250px;
   z-index: -1;
-  opacity: 0.35;
+  opacity: 0.22;
   pointer-events: none;
 }
 </style>
@@ -4214,7 +4214,7 @@ function resize(){
   renderer.setSize(width,height,false);renderer.setPixelRatio(Math.min(devicePixelRatio||1,CONFIG.pixelRatioMax));
   camera.aspect=aspect;camera.updateProjectionMatrix();
   // Se conservan el grupo y sus destinos al girar la pantalla.
-  bouquet.position.set(landscape?aspect*1.35:0,landscape?.15:aspect<.8?-.2:-.8,0);
+  bouquet.position.set(landscape?aspect*1.35:0,landscape?.15:aspect<.8?-1.8:-1.5,0);
   const scale=aspect<.8?Math.min(.62,aspect*1.42):landscape?Math.min(.81,height/650):.8;
   bouquet.scale.setScalar(scale);rings.scale.setScalar(aspect<.8?.83:1);dust.scale.setScalar(scale);
 }
